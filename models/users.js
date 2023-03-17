@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Users.init({
-    userid: {
+    userId: {
       allowNull: false,
       primaryKey: true,
       type: DataTypes.STRING

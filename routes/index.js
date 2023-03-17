@@ -2,8 +2,10 @@ const express = require('express')
 const router = express.Router()
 
 const loginRouter = require('./login.router')
-const signupRouter = require('./signup.router')
+const signinRouter = require('./signin.router')
+const postRouter = require('./post.router')
 
-router.use('/auth', [loginRouter, signupRouter])
+router.use('/auth', [loginRouter, signinRouter])
+router.use('/', [postRouter])
 
 module.exports = router

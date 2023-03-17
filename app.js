@@ -10,7 +10,7 @@ app.use(express.json())
 app.use(cookieParser())
 app.use(morgan('dev'))
 
-app.use(globalRouter)
+app.use("/api", globalRouter)
 
 
 app.listen(port, () => {

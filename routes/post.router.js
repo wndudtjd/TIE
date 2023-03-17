@@ -14,12 +14,13 @@ router.get('/', async (req, res, next) => {
                     model: Users,
                     attributes: []
                 }
-            ]
+            ],
+            order :[['createdAt', 'DESC']],
         })
-        res.json({ posts })
+        res.json(posts)
     } catch (err) {
         console.log(err)
-        res.status(400).json({ msg: "예상하지 못한 에러가 발생하였습니다." })
+        res.status(400).json({ errorMessage: "예상하지 못한 에러가 발생하였습니다." })
         next()
     }
 })
@@ -32,20 +33,21 @@ router.delete('/:postId', authmiddleware, async (req, res, next) => {
         const post = await Posts.findOne({
             where: { postId }
         })
+        console.log(user)
         if (!post) {
-            return res.status(404).json({ msg: '게시글이 존재하지 않습니다.' })
+            return res.status(404).json({ errorMessage: '게시글이 존재하지 않습니다.' })
         }
         if (post.userId != user.userId) {
-            return res.status(403).json({ msg: "게시글의 삭제 권한이 존재하지 않습니다." })
+            return res.status(403).json({ errorMessage: "게시글의 삭제 권한이 존재하지 않습니다." })
         }
-
-        await Posts.destory({
+        
+        await Posts.destroy({
             where: { postId, userId: user.userId }
         })
         res.json({ msg: "게시글 삭제 완료" })
     } catch (err) {
         console.log(err)
-        res.status(400).json({ msg: "게시글 작성에 실패하였습니다" })
+        res.status(400).json({ errorMessage: "게시글 삭제에 실패하였습니다" })
         next()
     }
 })
@@ -66,13 +68,13 @@ router.get('/:postId', async (req, res, next) => {
             ]
         })
         if (!posts) {
-            return res.status(404).json({ msg: '게시글이 존재하지 않습니다.' })
+            return res.status(404).json({ errorMessage: '게시글이 존재하지 않습니다.' })
         }
         
-        res.json({ posts })
+        res.json( posts )
     } catch (err) {
         console.log(err)
-        res.status(400).json({ msg: "예상하지 못한 에러가 발생하였습니다." })
+        res.status(400).json({ errorMessage: "예상하지 못한 에러가 발생하였습니다." })
         next()
     }
 })
@@ -92,10 +94,10 @@ router.patch('/:postId', authmiddleware,async (req, res, next) => {
             })
         }
         if (post.userId != user.userId) {
-            return res.status(403).json({ msg: "게시글의 수정 권한이 존재하지 않습니다." })
+            return res.status(403).json({ errorMessage: "게시글의 수정 권한이 존재하지 않습니다." })
         }
         if (!title || !content) {
-            return res.status(412).json({ msg: "데이터 형식이 올바르지 않습니다." })
+            return res.status(412).json({ errorMessage: "데이터 형식이 올바르지 않습니다." })
         }
         await Posts.update({
             title,
@@ -106,7 +108,7 @@ router.patch('/:postId', authmiddleware,async (req, res, next) => {
         res.json({ msg: "게시글 수정 완료" })
     } catch (err) {
         console.log(err)
-        res.status(400).json({ msg: "예상하지 못한 에러가 발생하였습니다." })
+        res.status(400).json({ errorMessage: "예상하지 못한 에러가 발생하였습니다." })
         next()
     }
 

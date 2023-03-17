@@ -12,6 +12,7 @@ router.post('/login', async (req, res) => {
   const user = await Users.findOne({
     where: { userId },
   })
+  console.log(user)
 
   const match = bcrypt.compareSync(password, user.password)
 
@@ -22,7 +23,7 @@ router.post('/login', async (req, res) => {
     return
   }
 
-  const token = jwt.sign({ userId: user.userId }, process.env.TOKEN_KEY)
+  const token = jwt.sign({ nickname: user.nickname }, process.env.TOKEN_KEY)
 
   res.cookie('authorization', `Bearer ${token}`)
   res.status(200).json({

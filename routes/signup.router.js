@@ -5,14 +5,28 @@ const { Users } = require('../models')
 
 // 아이디 중복체크 API
 router.post('/signup/check', async (req, res) => {
-  const { userId } = req.body
-  const existUsers = await Users.findOne({
-    where: {
-      userId,
-    },
-  })
-
   try {
+    const { userId } = req.body
+    const existUsers = await Users.findOne({
+      where: {
+        userId,
+      },
+    })
+
+    let checkuserId = /^[a-z0-9]+$/
+
+    if (checkuserId) {
+      res.status(400).send({
+        errorMessage: '아이디 형식이 올바르지 않습니다.',
+      })
+      return
+    }
+    if (userId.length === 0) {
+      res.status(400).send({
+        errorMessage: '아이디를 입력해주세요',
+      })
+      return
+    }
     if (existUsers) {
       res.status(400).send({
         duplicationResult: true,
@@ -37,7 +51,8 @@ router.post('/signup/check', async (req, res) => {
 router.post('/signup', async (req, res) => {
   const { userId, nickname, password, confirm } = req.body
 
-  let checkPassword = /^[a-zA-Z0-9]{8,30}$/
+  let checkNickname = /^[a-zA-Z가-힣0-9]{3,10}$/
+  let checkPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,30}$/
 
   const hashedPw = bcrypt.hashSync(password, 10)
   try {
@@ -46,6 +61,14 @@ router.post('/signup', async (req, res) => {
       res.status(400).send({
         errorMessage: '비밀번호 형식이 올바르지 않습니다.',
       })
+      return
+    }
+
+    if (!checkNickname) {
+      res.status(400).send({
+        errorMessage: '닉네임 형식이 올바르지 않습니다.',
+      })
+      return
     }
 
     // 비밀번호와 확인비번이 다른경우
@@ -53,6 +76,7 @@ router.post('/signup', async (req, res) => {
       res.status(400).send({
         errorMessage: '패스워드가 패스워드 확인란과 동일하지 않습니다.',
       })
+      return
     }
 
     const user = new Users({ userId, nickname, password: hashedPw })

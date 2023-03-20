@@ -19,12 +19,12 @@ app.use('/api', globalRouter)
 const cors = require('cors')
 app.use(cors())
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-origin', '*')
-  res.setHeader('Access-Control-Allow-Headers', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE')
-  next()
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Headers', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE')
+    next()
 })
 
 app.listen(port, () => {
-  console.log(`listening at http://localhost:${port}`)
+    console.log(`listening at http://localhost:${port}`)
 })

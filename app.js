@@ -9,6 +9,9 @@ const globalRouter = require('./routes')
 app.use(express.json())
 app.use(cookieParser())
 app.use(morgan('dev'))
+// 정적 파일로 제공하기 위한 미들웨어
+// 클라이언트에서 요청할때 브라우저에서 직접 접근 가능해짐.
+app.use(express.static('public'))
 
 app.use("/api", globalRouter)
 

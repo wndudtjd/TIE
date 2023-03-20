@@ -10,7 +10,6 @@ const d = dayjs()
 const multer = require('multer')
 // path 모듈 불러오기
 const path = require('path')
-const { emitWarning } = require('process')
 
 // 디스크 스토리지 엔진 설정
 const storage = multer.diskStorage({

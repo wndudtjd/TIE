@@ -13,10 +13,18 @@ app.use(morgan('dev'))
 // 클라이언트에서 요청할때 브라우저에서 직접 접근 가능해짐.
 app.use(express.static('public'))
 
-app.use("/api", globalRouter)
+app.use('/api', globalRouter)
 
-
-app.listen(port, () => {
-    console.log(`listening at http://localhost:${port}`)
+// cors 미들웨어 사용
+const cors = require('cors')
+app.use(cors())
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-origin', '*')
+  res.setHeader('Access-Control-Allow-Headers', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE')
+  next()
 })
 
+app.listen(port, () => {
+  console.log(`listening at http://localhost:${port}`)
+})

@@ -22,7 +22,7 @@ router.post('/signup/check', async (req, res) => {
     }
     res.status(201).send({
       duplicationResult: false,
-      msg: '사용가능한 아이디 입니다.',
+      message: '사용가능한 아이디 입니다.',
     })
   } catch (err) {
     console.error(err)

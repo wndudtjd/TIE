@@ -48,8 +48,9 @@ router.get('/:postId/comments', async(req, res) => {
     try {
         const { postId } = req.params;
 
+        // Comments와 Users 테이블을 참조하여 comments 변수에 저장
         const comments = await Comments.findAll({
-            attributes: ["commentId", "userId", "comment", "createdAt", "updatedAt", "User.nickname"],
+            attributes: ["commentId", "userId", "comment", "createdAt", "User.nickname"],
             include: [
                 {
                     model: Users,
@@ -66,13 +67,13 @@ router.get('/:postId/comments', async(req, res) => {
     } catch(err) {
         console.log(err);
         res.status(400).json({
-            errorMessage: "게시글 조회에 실패했습니다."
+            errorMessage: "댓글 조회에 실패했습니다."
         });
         return;
     }
 });
 
-// 댓글 삭제 API
+// 댓글 삭제 API (완료)
 router.delete("/:postId/comments/:commentId", authMiddleware, async(req, res) => {
     try {
         const { postId, commentId } = req.params;
@@ -113,6 +114,7 @@ router.delete("/:postId/comments/:commentId", authMiddleware, async(req, res) =>
             return;
         }
     } catch(err) {
+        console.log(err);
         res.status(400).json({
             errorMessage: "댓글 삭제에 실패했습니다."
         });

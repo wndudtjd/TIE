@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const authmiddleware = require('../middlewares/auth-middleware')
-const { Posts, Users } = require('../models')
+const { Posts, Users,Sequelize } = require('../models')
 const fs = require('fs').promises
 // 날짜 변환 모듈
 const dayjs = require('dayjs')
@@ -56,7 +56,16 @@ router.get('/', async (req, res, next) => {
     try {
         let posts = await Posts.findAll({
             raw: true,
-            attributes: ['postId', 'title', 'content', 'createdAt', 'img', 'User.nickname', 'userId'],
+            attributes: [
+                'postId', 
+                'title', 
+                'content',
+                [Sequelize.fn('date_format', Sequelize.fn('convert_tz', 
+                Sequelize.col('Posts.createdAt'), '+00:00', '+09:00'), 
+                '%Y-%m-%d %H:%i:%s'), 'createdAt'], 
+                'img', 
+                'User.nickname', 
+                'userId'],
             include: [
                 {
                     model: Users,
@@ -65,10 +74,10 @@ router.get('/', async (req, res, next) => {
             ],
             order: [['createdAt', 'DESC']],
         })
-        posts = posts.map(post => ({
-            ...post,
-            createdAt : dayjs(post.createdAt).format('YYYY-MM-DD HH:mm:ss')
-        }))
+        // posts = posts.map(post => ({
+        //     ...post,
+        //     createdAt : dayjs(post.createdAt).format('YYYY-MM-DD HH:mm:ss')
+        // }))
         res.json(posts)
     } catch (err) {
         console.log(err)

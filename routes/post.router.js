@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const authmiddleware = require('../middlewares/auth-middleware')
-const { Posts, Users } = require('../models')
+const { Posts, Users,Sequelize } = require('../models')
 const fs = require('fs').promises
 // 날짜 변환 모듈
 const dayjs = require('dayjs')
@@ -54,9 +54,18 @@ const upload = multer({
 // 게시글 전체 조회 API
 router.get('/', async (req, res, next) => {
     try {
-        const posts = await Posts.findAll({
+        let posts = await Posts.findAll({
             raw: true,
-            attributes: ['postId', 'title', 'content', 'createdAt', 'img', 'User.nickname', 'userId'],
+            attributes: [
+                'postId', 
+                'title', 
+                'content',
+                [Sequelize.fn('date_format', Sequelize.fn('convert_tz', 
+                Sequelize.col('Posts.createdAt'), '+00:00', '+09:00'), 
+                '%Y-%m-%d %H:%i:%s'), 'createdAt'], 
+                'img', 
+                'User.nickname', 
+                'userId'],
             include: [
                 {
                     model: Users,
@@ -65,6 +74,10 @@ router.get('/', async (req, res, next) => {
             ],
             order: [['createdAt', 'DESC']],
         })
+        // posts = posts.map(post => ({
+        //     ...post,
+        //     createdAt : dayjs(post.createdAt).format('YYYY-MM-DD HH:mm:ss')
+        // }))
         res.json(posts)
     } catch (err) {
         console.log(err)
@@ -91,9 +104,11 @@ router.get('/:postId', async (req, res, next) => {
         if (!post) {
             return res.status(404).json({ errorMessage: '게시글이 존재하지 않습니다.' })
         }
+        console.log(post.createdAt.toLocaleString())
         const isUpdate = post.createdAt.toLocaleString() == post.updatedAt.toLocaleString() ? false : true
-
-        res.status(200).json({ post, isUpdate })
+        const createdAt = dayjs(post.createdAt).format('YYYY-MM-DD HH:mm:ss')
+        const updatedAt = dayjs(post.updatedAt).format('YYYY-MM-DD HH:mm:ss')
+        res.status(200).json({ 'post':{...post ,createdAt,updatedAt}, isUpdate })
     } catch (err) {
         console.log(err)
         res.status(400).json({ errorMessage: "예상하지 못한 에러가 발생하였습니다." })
@@ -131,7 +146,9 @@ router.post('/', authmiddleware, upload.single('img'), async (req, res, next) =>
         // Date 객체를 현제 시스템 로케일로
         const isUpdate = post.createdAt.toLocaleString() == post.updatedAt.toLocaleString() ? false : true
         console.log(isUpdate)
-        res.json({ msg: "게시글 작성 완료", post, isUpdate })
+        const createdAt = dayjs(post.createdAt).format('YYYY-MM-DD HH:mm:ss')
+        const updatedAt = dayjs(post.updatedAt).format('YYYY-MM-DD HH:mm:ss')
+        res.status(200).json({message: "게시글 작성 완료", 'post':{...post ,createdAt,updatedAt}, isUpdate })
     } catch (err) {
         console.log(err)
         if (err instanceof multer.MulterError) {
@@ -156,6 +173,9 @@ router.patch('/:postId',
     }
     , upload.single('img'), async (req, res, next) => {
         try {
+            if(req.err){
+                return res.status(400).json(req.err)
+            }
             const { postId } = req.params
             const { title, content } = req.body
             const existPost = await Posts.findOne({ where: { postId } })
@@ -203,11 +223,13 @@ router.patch('/:postId',
             })
             console.log('수정 이미지', post.img)
             const isUpdate = post.createdAt.toLocaleString() == post.updatedAt.toLocaleString() ? false : true
-
-            res.json({ msg: "게시글 수정 완료", post, isUpdate })
+            const createdAt = dayjs(post.createdAt).format('YYYY-MM-DD HH:mm:ss')
+            const updatedAt = dayjs(post.updatedAt).format('YYYY-MM-DD HH:mm:ss')
+            res.status(200).json({message: "게시글 수정 완료", 'post':{...post ,createdAt,updatedAt}, isUpdate })
+            // res.json({ msg: "게시글 수정 완료", post, isUpdate })
         } catch (err) {
             console.log(err)
-            res.status(400).json({ errorMessage: "게시글 수정에 실패하였습니다.." })
+            res.status(400).json({ errorMessage: "게시글 수정에 실패하였습니다." })
             next()
         }
 
@@ -234,7 +256,7 @@ router.delete('/:postId', authmiddleware, async (req, res, next) => {
         await Posts.destroy({
             where: { postId, userId: user.userId }
         })
-        res.json({ msg: "게시글 삭제 완료" })
+        res.json({ message: "게시글 삭제 완료" })
 
     } catch (err) {
         console.log(err)

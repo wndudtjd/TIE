@@ -13,9 +13,9 @@ router.post('/signup/check', async (req, res) => {
       },
     })
 
-    let checkuserId = /^[a-z0-9]+$/
+    let checkuserId = /^[a-zA-Z0-9]{3,12}$/
 
-    if (checkuserId) {
+    if (!checkuserId.test(userId)) {
       res.status(400).send({
         errorMessage: '아이디 형식이 올바르지 않습니다.',
       })
@@ -51,8 +51,8 @@ router.post('/signup/check', async (req, res) => {
 router.post('/signup', async (req, res) => {
   const { userId, nickname, password, confirm } = req.body
 
-  let checkNickname = /^[a-zA-Z가-힣0-9]{3,10}$/
-  let checkPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,30}$/
+  let checkNickname = /^[a-zA-Z가-힣0-9]{2,10}$/
+  let checkPassword = /^[a-zA-Z0-9]{8,30}$/
 
   const hashedPw = bcrypt.hashSync(password, 10)
   try {
@@ -64,7 +64,7 @@ router.post('/signup', async (req, res) => {
       return
     }
 
-    if (!checkNickname) {
+    if (!checkNickname.test(nickname)) {
       res.status(400).send({
         errorMessage: '닉네임 형식이 올바르지 않습니다.',
       })

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { Posts, Comments, Users, Sequelize } = require("../models");
 const authMiddleware = require("../middlewares/auth-middleware.js");
+const dayjs = require('dayjs');
 
 // 댓글 생성 API (완료)
 router.post('/:postId/comments', authMiddleware, async(req, res) => {
@@ -30,14 +31,23 @@ router.post('/:postId/comments', authMiddleware, async(req, res) => {
             return;
         }
 
+
         // 댓글 생성
-        await Comments.create({
+        createComment = await Comments.create({
             postId: postId,
             userId: userId,
             comment : comment,
         });
 
-        res.status(201).json({ message: "댓글 작성에 성공하였습니다." });
+        const formattedCreatedAt = dayjs(createComment.createdAt).format('YYYY-MM-DD HH:mm:ss');
+        const formattedUpdatedAt = dayjs(createComment.updatedAt).format('YYYY-MM-DD HH:mm:ss');
+        const formattedComment = {
+            ...createComment.toJSON(),
+            createdAt: formattedCreatedAt,
+            updatedAt: formattedUpdatedAt
+        };
+
+        res.status(201).json({ createComment: formattedComment, message: "댓글 작성에 성공하였습니다." });
 
     } catch(err) {
         console.log(err);

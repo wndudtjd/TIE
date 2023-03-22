@@ -60,8 +60,8 @@ router.get('/', async (req, res, next) => {
                 'postId', 
                 'title', 
                 'content',
-                [Sequelize.fn('date_format', Sequelize.fn('convert_tz', 
-                Sequelize.col('Posts.createdAt'), '+00:00', '+09:00'), 
+                [Sequelize.fn('date_format', 
+                Sequelize.col('Posts.createdAt'), 
                 '%Y-%m-%d %H:%i:%s'), 'createdAt'], 
                 'img', 
                 'User.nickname', 
@@ -108,6 +108,9 @@ router.get('/:postId', async (req, res, next) => {
         const isUpdate = post.createdAt.toLocaleString() == post.updatedAt.toLocaleString() ? false : true
         const createdAt = dayjs(post.createdAt).format('YYYY-MM-DD HH:mm:ss')
         const updatedAt = dayjs(post.updatedAt).format('YYYY-MM-DD HH:mm:ss')
+        // const file = path.join(__dirname, '../public',post.img)
+        // console.log(file)
+        // res.sendFile(file)
         res.status(200).json({ 'post':{...post ,createdAt,updatedAt}, isUpdate })
     } catch (err) {
         console.log(err)
@@ -116,6 +119,16 @@ router.get('/:postId', async (req, res, next) => {
     }
 })
 
+// 이미지 요청
+router.get('/:postId/img', async (req,res,next)=>{
+    const { postId } = req.params
+    let post = await Posts.findOne({where:{postId}})
+    post = post.dataValues
+
+    const file = path.join(__dirname, '../public',post.img)
+    console.log(file)
+    res.sendFile(file)
+})
 // 게시글 작성 API
 router.post('/', authmiddleware, upload.single('img'), async (req, res, next) => {
     try {

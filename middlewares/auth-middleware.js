@@ -3,7 +3,7 @@ const { Users } = require('../models')
 require('dotenv').config()
 
 module.exports = async (req, res, next) => {
-  const { authorization } = req.cookies
+  const { authorization } = req.headers
 
   const [authType, authToken] = (authorization ?? '').split(' ')
 

@@ -82,7 +82,9 @@ router.post('/signup', async (req, res) => {
     const user = new Users({ userId, nickname, password: hashedPw })
     await user.save()
 
-    res.status(201).send({ user })
+    res.status(201).send({
+      message: '회원가입 성공',
+    })
   } catch (err) {
     console.error(err)
 
